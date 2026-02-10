@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <label for="usuario">Usuario</label>
+            <input type="text" id="usuario" name="usuario" required>
+
+            <label for="contrasena">Contraseña</label>
+            <input type="password" id="contrasena" name="contrasena" required>
+
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="mensaje" style="margin-top:1rem;text-align:center;"></div>
+        <div style="margin-top:1rem; text-align:center;">
+            <a href="registro.html">¿No tienes cuenta? Regístrate aquí</a>
+        </div>
+    </div>
+</body>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const usuario = document.getElementById('usuario').value;
+    const contrasena = document.getElementById('contrasena').value;
+    const mensajeDiv = document.getElementById('mensaje');
+    mensajeDiv.textContent = '';
+    try {
+        const response = await fetch('/api/usuarios', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ usuario, contrasena })
+        });
+        const data = await response.json();
+        if (response.ok && data.validado) {
+            mensajeDiv.textContent = '¡Validación exitosa!';
+            mensajeDiv.style.color = 'green';
+        } else {
+            mensajeDiv.textContent = 'Usuario o contraseña incorrectos.';
+            mensajeDiv.style.color = 'red';
+        }
+    } catch (error) {
+        mensajeDiv.textContent = 'Error de conexión con el servidor.';
+        mensajeDiv.style.color = 'red';
+    }
+});
+</script>
+</html>

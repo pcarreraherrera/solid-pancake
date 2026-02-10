@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Usuario</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Registro de Usuario</h2>
+        <form id="registroForm">
+            <label for="usuario">Usuario</label>
+            <input type="text" id="usuario" name="usuario" required>
+
+            <label for="contrasena">Contraseña</label>
+            <input type="password" id="contrasena" name="contrasena" required>
+
+            <button type="submit">Registrarse</button>
+        </form>
+        <div id="mensaje" style="margin-top:1rem;text-align:center;"></div>
+        <div style="margin-top:1rem; text-align:center;">
+            <a href="login.html">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
+    </div>
+</body>
+<script>
+// Cambia la URL y el body según tu API de registro
+
+document.getElementById('registroForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const usuario = document.getElementById('usuario').value;
+    const contrasena = document.getElementById('contrasena').value;
+    const mensajeDiv = document.getElementById('mensaje');
+    mensajeDiv.textContent = '';
+    try {
+        const response = await fetch('/api/registro', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ usuario, contrasena })
+        });
+        const data = await response.json();
+        if (response.ok && data.registrado) {
+            mensajeDiv.textContent = '¡Registro exitoso! Ahora puedes iniciar sesión.';
+            mensajeDiv.style.color = 'green';
+        } else {
+            mensajeDiv.textContent = data.error || 'No se pudo registrar el usuario.';
+            mensajeDiv.style.color = 'red';
+        }
+    } catch (error) {
+        mensajeDiv.textContent = 'Error de conexión con el servidor.';
+        mensajeDiv.style.color = 'red';
+    }
+});
+</script>
+</html>
