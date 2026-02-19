@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido</title>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bienvenido, <span id="usuario"></span>!</h1>
+        <p>Has iniciado sesión correctamente.</p>
+        <button onclick="logout()">Cerrar sesión</button>
+    </div>
+    <script>
+    async function verificarSesion() {
+        try {
+            const response = await fetch('/api/sesion');
+            const data = await response.json();
+
+        if (data.autenticado) {
+            document.getElementById('usuario').textContent =
+                data.nombre + ' ' + data.apellido;
+        } else {
+            window.location.href = 'login.html';
+        }
+
+    } catch (error) {
+        window.location.href = 'login.html';
+    }
+}
+
+async function logout() {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = 'login.html';
+}
+
+verificarSesion();
+</script>
+</body>
+</html>

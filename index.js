@@ -1,3 +1,4 @@
+const session = require('express-session');
 const express = require('express');
 const sql = require('mssql');
 const path = require('path');
@@ -8,6 +9,16 @@ app.use(express.json());
 
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+    secret: 'clave_secreta_segura',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false // true solo si usas HTTPS
+    }
+}));
+
 
 
 // Configuración de la conexión a SQL Server
@@ -38,17 +49,56 @@ app.get('/api/usuarios', async (req, res) => {
 // Endpoint para validar usuario y contraseña
 app.post('/api/usuarios', async (req, res) => {
     const { usuario, contrasena } = req.body;
+
     try {
-        const result = await sql.query`SELECT * FROM Usuarios WHERE Usuario = ${usuario} AND Contrasena = ${contrasena}`;
+        const result = await sql.query`
+            SELECT Nombre, Apellido 
+            FROM Usuarios 
+            WHERE Usuario = ${usuario} 
+            AND Contrasena = ${contrasena}
+        `;
+
         if (result.recordset.length > 0) {
+            const user = result.recordset[0];
+
+            // Guardar datos en sesión
+            req.session.usuario = {
+                nombre: user.Nombre,
+                apellido: user.Apellido
+            };
+
             res.json({ validado: true });
+
         } else {
-            res.json({ validado: false });
+            res.status(401).json({ validado: false });
         }
+
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
+
+//Endpoint para obtener datos del usuario autenticado
+app.get('/api/sesion', (req, res) => {
+    if (req.session.usuario) {
+        res.json({
+            autenticado: true,
+            nombre: req.session.usuario.nombre,
+            apellido: req.session.usuario.apellido
+        });
+    } else {
+        res.status(401).json({ autenticado: false });
+    }
+});
+
+// Endpoint para cerrar sesión
+app.post('/api/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.json({ logout: true });
+    });
+});
+
+
 
 // Endpoint para registrar nuevos usuarios
 app.post('/api/registro', async (req, res) => {

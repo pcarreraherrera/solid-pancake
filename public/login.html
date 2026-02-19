@@ -41,8 +41,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
         });
         const data = await response.json();
         if (response.ok && data.validado) {
-            mensajeDiv.textContent = '¡Validación exitosa!';
-            mensajeDiv.style.color = 'green';
+            // Guardar usuario y redirigir a la página de bienvenida
+            window.location.href = 'bienvenido.html';
         } else {
             mensajeDiv.textContent = 'Usuario o contraseña incorrectos.';
             mensajeDiv.style.color = 'red';
